@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/social/bloc/comments_bloc.dart';
-import 'package:social_app/social/bloc/posts_bloc.dart';
+
+import 'package:social_app/social/models/post.dart';
+import 'package:social_app/social/widgets/add_comment_widget.dart';
 import 'package:social_app/social/widgets/buttom_loader.dart';
 import 'package:social_app/social/widgets/comment_item.dart';
 
 class ListComment extends StatefulWidget {
-  final int id;
-
-  const ListComment({super.key, required this.id});
+  final Post post;
+  const ListComment(
+    this.post, {
+    super.key,
+  });
   @override
   State<ListComment> createState() => _ListCommentState();
 }
@@ -20,15 +24,14 @@ class _ListCommentState extends State<ListComment> {
   @override
   void initState() {
     super.initState();
-    // Khởi tạo bloc
     commentsBloc = context.read<CommentsBloc>();
-    commentsBloc..add(commentsFetched(id: widget.id));
+    commentsBloc..add(commentsFetched(id: widget.post.id));
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
     if (_isBottom) {
-      commentsBloc.add(commentsFetched(id: widget.id));
+      commentsBloc.add(commentsFetched(id: widget.post.id));
     }
   }
 
@@ -41,30 +44,58 @@ class _ListCommentState extends State<ListComment> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(10),
-      child:
-          BlocBuilder<CommentsBloc, CommentsState>(builder: (context, state) {
-        switch (state.status) {
-          case CommentsStatus.failure:
-            return const Center(child: Text('Failed to fetch posts'));
-          case CommentsStatus.success:
-            if (state.comments.isEmpty) {
-              return const Center(child: Text('No posts'));
-            }
-            return ListView.builder(
-                itemCount: state.comments.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return index >= state.comments.length
-                      ? const BottomLoader()
-                      : CommentCard(
-                          comment: state.comments[index],
-                        );
-                });
-          case CommentsStatus.initial:
-            return const Center(child: CircularProgressIndicator());
-        }
-      }),
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        children: [
+          Container(
+            height: 40,
+            padding:
+                const EdgeInsets.only(top: 5, left: 20, right: 20, bottom: 10),
+            child: Text(
+              "${widget.post.title}",
+              softWrap: true,
+            ),
+          ),
+          Expanded(
+              flex: 6,
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                child: BlocBuilder<CommentsBloc, CommentsState>(
+                    builder: (context, state) {
+                  switch (state.status) {
+                    case CommentsStatus.failure:
+                      return const Center(child: Text('Failed to fetch posts'));
+                    case CommentsStatus.success:
+                      if (state.comments.isEmpty) {
+                        return const Center(child: Text('No posts'));
+                      }
+                      return ListView.builder(
+                          itemCount: state.comments.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return index >= state.comments.length
+                                ? const BottomLoader()
+                                : CommentCard(
+                                    comment: state.comments[index],
+                                  );
+                          });
+                    case CommentsStatus.initial:
+                      return const Center(child: CircularProgressIndicator());
+                  }
+                }),
+              )),
+          Container(
+            height: 70,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: AddCommentWidget(
+                  commentsBloc: commentsBloc, id: widget.post.id),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

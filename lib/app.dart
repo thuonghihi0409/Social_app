@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/social/bloc/comments_bloc.dart';
 import 'package:social_app/social/bloc/photos_bloc.dart';
 import 'package:social_app/social/bloc/posts_bloc.dart';
-import 'package:social_app/social/models/comment.dart';
+
 import 'package:social_app/social/view/image_screen.dart';
 import 'package:social_app/social/view/post_screen.dart';
 
@@ -49,26 +49,80 @@ class _HomeSreeenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.post_add, color: Colors.white),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.photo, color: Colors.white),
-            label: '',
+      body: Stack(
+        children: [
+          _screens[_selectedIndex],
+          Positioned(
+            bottom: 5,
+            left: 40,
+            right: 40,
+            child: Center(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      offset: const Offset(0, 4),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: BottomNavigationBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  currentIndex: _selectedIndex,
+                  onTap: (index) {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
+                  items: [
+                    _buildNavItem(
+                      icon: Icons.post_add,
+                      index: 0,
+                      label: 'Posts',
+                    ),
+                    _buildNavItem(
+                      icon: Icons.photo,
+                      index: 1,
+                      label: 'Photos',
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  BottomNavigationBarItem _buildNavItem({
+    required IconData icon,
+    required int index,
+    required String label,
+  }) {
+    return BottomNavigationBarItem(
+      icon: ShaderMask(
+        shaderCallback: (bounds) => LinearGradient(
+          colors: _selectedIndex == index
+              ? [Colors.purple, Colors.blue]
+              : [Colors.white.withOpacity(0.7), Colors.white.withOpacity(0.7)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ).createShader(bounds),
+        child: Icon(
+          icon,
+          size: 30,
+          color: Colors.white,
+        ),
+      ),
+      label: '',
     );
   }
 }

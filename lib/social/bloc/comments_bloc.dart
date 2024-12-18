@@ -15,19 +15,22 @@ class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
   Future<void> _addComments(
       commentsAdd event, Emitter<CommentsState> emit) async {
     CommentRepository commentRepository = CommentRepository();
+    return emit(state.copyWith(
+        status: CommentsStatus.success,
+        comments: List.of(state.comments)..add(event.comment),
+        hasReachedMax: false));
+    // try {
+    //   final comment =
+    //       await commentRepository.addComment(event.comment, event.id);
 
-    try {
-      final comments =
-          await commentRepository.addComment(event.comment, event.id);
-      return emit(comments.isEmpty
-          ? state.copyWith(hasReachedMax: true)
-          : state.copyWith(
-              status: CommentsStatus.success,
-              comments: List.of(state.comments)..addAll(comments),
-              hasReachedMax: false));
-    } catch (e) {
-      // emit(state.copyWith(status: CommentsStatus.failure));
-    }
+    //   return emit(state.copyWith(
+    //       status: CommentsStatus.success,
+    //       comments: List.of(state.comments)..add(comment),
+    //       hasReachedMax: false));
+    // } catch (e) {
+    //   print("============");
+    //   // emit(state.copyWith(status: CommentsStatus.failure));
+    // }
   }
 
   Future<void> _fetchComments(

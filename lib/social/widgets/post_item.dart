@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:social_app/social/bloc/posts_bloc.dart';
 import 'package:social_app/social/models/post.dart';
-import 'package:social_app/social/widgets/add_comment_widget.dart';
+
 import 'package:social_app/social/widgets/list_comment.dart';
 import 'package:social_app/social/widgets/reaction_widget.dart';
 
@@ -15,8 +15,6 @@ class PostItem extends StatefulWidget {
 }
 
 class _PostItemState extends State<PostItem> {
-  // Các biểu tượng cảm xúc
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -90,30 +88,7 @@ class _PostItemState extends State<PostItem> {
         useRootNavigator: true,
         builder: (context) {
           return FractionallySizedBox(
-            heightFactor: 0.8,
-            child: Column(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    padding: EdgeInsets.only(
-                        top: 5, left: 20, right: 20, bottom: 10),
-                    child: Text(
-                      "${widget.post.title}",
-                      softWrap: true,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 6,
-                  child: ListComment(
-                    id: widget.post.id,
-                  ),
-                ),
-                Expanded(flex: 1, child: AddCommentWidget()),
-              ],
-            ),
-          );
+              heightFactor: 0.8, child: ListComment(widget.post));
         });
   }
 }

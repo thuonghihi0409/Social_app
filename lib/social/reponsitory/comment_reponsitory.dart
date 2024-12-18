@@ -25,22 +25,22 @@ class CommentRepository {
   }
 
   // add a imageimage (POST)
-  Future<Photo> addComment(Photo photo) async {
+  Future<Comment> addComment(Comment comment, int id) async {
     try {
       final response = await http.post(
-        Uri.parse(baseUrl),
+        Uri.parse('$baseUrl/$id/comments'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode(photo.toJson()),
+        body: json.encode(comment.toJson()),
       );
 
       if (response.statusCode == 201) {
-        return Photo.fromJson(json.decode(response.body));
+        return Comment.fromJson(json.decode(response.body));
       } else {
         throw Exception(
-            "Failed to add photo. Status Code: ${response.statusCode}");
+            "Failed to add comment. Status Code: ${response.statusCode}");
       }
     } catch (e) {
-      throw Exception("Error adding photo: $e");
+      throw Exception("Error adding comment: $e");
     }
   }
 

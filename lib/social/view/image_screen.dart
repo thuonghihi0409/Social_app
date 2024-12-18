@@ -1,6 +1,9 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/social/bloc/comments_bloc.dart';
 import 'package:social_app/social/bloc/photos_bloc.dart';
+import 'package:social_app/social/widgets/add_comment_widget.dart';
 
 class ImageScreen extends StatefulWidget {
   const ImageScreen({super.key});
@@ -12,28 +15,22 @@ class ImageScreen extends StatefulWidget {
 class _ImageScreenState extends State<ImageScreen> {
   late final PhotosBloc _photosBloc;
   final _pageController = PageController();
-
+  late final CommentsBloc commentsBloc;
+  @override
   void initState() {
     super.initState();
+    commentsBloc = context.read<CommentsBloc>();
     _pageController.addListener(_onPage);
-    // Khởi tạo bloc
     _photosBloc = context.read<PhotosBloc>();
-    _photosBloc..add(PhotosFetched());
+    _photosBloc.add(PhotosFetched());
   }
 
-  void _onPage() {
-    // if (!_pageController.hasClients) return;
-    // final max = _pageController.position.maxScrollExtent;
-    // final current = _pageController.position.pixels;
-    // if (current >= max - 2) {
-    //   _postsBloc.add(PhotosFetched());
-    // }
-  }
+  void _onPage() {}
 
+  @override
   void dispose() {
     _pageController.removeListener(_onPage);
     _pageController.dispose();
-    //_photosBloc.close();
     super.dispose();
   }
 
@@ -42,54 +39,65 @@ class _ImageScreenState extends State<ImageScreen> {
     return Scaffold(
       body: SafeArea(
         child: BlocBuilder<PhotosBloc, PhotosState>(
-            buildWhen: (previous, current) => previous.photos != current.photos,
-            builder: (context, state) {
-              return Stack(
-                children: [
-                  // PageView for images
-                  PageView.builder(
-                    itemCount: state.photos.length,
-                    itemBuilder: (context, index) {
-                      return Image.network(
-                        state.photos[index].url,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
-                            Icons.broken_image,
-                            size: 50,
-                            color: Colors.grey,
-                          );
-                        },
-                      );
-                    },
-                    onPageChanged: (index) {
-                      if (index >= state.photos.length - 2) {
-                        _photosBloc.add(PhotosFetched());
-                      }
-                    },
-                    scrollDirection: Axis.vertical,
-                  ),
-
-                  // Content Overlay
-                  SafeArea(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Top User Info
-                        _buildUserInfo(),
-                        _buildBottomActions(),
-                      ],
+          buildWhen: (previous, current) => previous.photos != current.photos,
+          builder: (context, state) {
+            return PageView.builder(
+              controller: _pageController,
+              itemCount: state.photos.length,
+              itemBuilder: (context, index) {
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Fullscreen Image
+                    Image.network(
+                      state.photos[index].url,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.broken_image,
+                          size: 50,
+                          color: Colors.grey,
+                        );
+                      },
                     ),
-                  ),
-                ],
-              );
-            }),
+
+                    // Top User Info with Blur Background
+                    Positioned(
+                      top: 20,
+                      left: 0,
+                      right: 100,
+                      child: _buildBlurContainer(
+                        child: _buildUserInfo(),
+                      ),
+                    ),
+
+                    // Bottom Actions with Blur Background
+                    Positioned(
+                      bottom: 60,
+                      left: 0,
+                      right: 0,
+                      child: _buildBlurContainer(
+                        child: _buildBottomActions(state.photos[index].id),
+                      ),
+                    ),
+                  ],
+                );
+              },
+              onPageChanged: (index) {
+                if (index >= state.photos.length - 2) {
+                  _photosBloc.add(PhotosFetched());
+                }
+              },
+              scrollDirection: Axis.vertical,
+            );
+          },
+        ),
       ),
     );
   }
@@ -110,36 +118,36 @@ class _ImageScreenState extends State<ImageScreen> {
           ),
           SizedBox(width: 12),
           // User Text Info
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '@marina_bothman',
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
-              ),
-              SizedBox(height: 8),
-              SizedBox(
-                width: 200,
-                child: Text(
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '@marina_bothman',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+                SizedBox(height: 8),
+                Text(
                   'The best day with my best friends! @sam_rogerson @alice_cooper',
                   style: TextStyle(fontSize: 14, color: Colors.white70),
-                  overflow: TextOverflow.clip,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  // Bottom Actions: Tags, Comments, Likes, and Icons
-  Widget _buildBottomActions() {
+  // Bottom Actions
+  Widget _buildBottomActions(int id) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0, left: 16, right: 16),
+      padding: const EdgeInsets.all(10.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -152,7 +160,7 @@ class _ImageScreenState extends State<ImageScreen> {
           ),
           const SizedBox(height: 8),
 
-          // Icons Row
+          // Action Icons
           Row(
             children: [
               _buildIconWithText(Icons.favorite, '37k'),
@@ -163,18 +171,13 @@ class _ImageScreenState extends State<ImageScreen> {
           ),
 
           // Add Comment
-          const Padding(
-            padding: EdgeInsets.only(top: 8.0),
-            child: Text(
-              "Add comment",
-              style: TextStyle(color: Colors.white54, fontSize: 14),
-            ),
-          ),
+          AddCommentWidget(commentsBloc: commentsBloc, id: id),
         ],
       ),
     );
   }
 
+  // Tag Widget
   Widget _buildTag(String tag) {
     return Container(
       margin: const EdgeInsets.only(right: 8),
@@ -187,6 +190,7 @@ class _ImageScreenState extends State<ImageScreen> {
     );
   }
 
+  // Icon with Text Widget
   Widget _buildIconWithText(IconData icon, String label) {
     return Padding(
       padding: const EdgeInsets.only(right: 16.0),
@@ -196,6 +200,20 @@ class _ImageScreenState extends State<ImageScreen> {
           const SizedBox(width: 4),
           Text(label, style: const TextStyle(color: Colors.white)),
         ],
+      ),
+    );
+  }
+
+  // Blur Container
+  Widget _buildBlurContainer({required Widget child}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          color: Colors.black.withOpacity(0.4),
+          child: child,
+        ),
       ),
     );
   }

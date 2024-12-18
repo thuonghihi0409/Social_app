@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/social/bloc/comments_bloc.dart';
+import 'package:social_app/social/bloc/photos_bloc.dart';
+import 'package:social_app/social/bloc/posts_bloc.dart';
+import 'package:social_app/social/models/comment.dart';
 import 'package:social_app/social/view/image_screen.dart';
 import 'package:social_app/social/view/post_screen.dart';
 
@@ -7,14 +12,25 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home:  HomeScreen(),
-      );
-    
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<PostsBloc>(
+          create: (BuildContext context) => PostsBloc(),
+        ),
+        BlocProvider<PhotosBloc>(
+          create: (BuildContext context) => PhotosBloc(),
+        ),
+        BlocProvider<CommentsBloc>(
+          create: (BuildContext context) => CommentsBloc(),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: HomeScreen(),
+      ),
+    );
   }
 }
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,7 +40,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeSreeenState extends State<HomeScreen> {
-  int _selectedIndex = 0; 
+  int _selectedIndex = 0;
   final List<Widget> _screens = [
     PostScreen(),
     ImageScreen(),
@@ -33,16 +49,16 @@ class _HomeSreeenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex], 
+      body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
-        currentIndex: _selectedIndex, 
+        currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
-        items:  [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add, color: Colors.white),
             label: '',

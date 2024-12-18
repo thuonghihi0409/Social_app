@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:social_app/social/models/comment.dart';
 
-class CommentCard extends StatelessWidget {
-  final String username;
-  final String timeAgo;
-  final String commentText;
-  final bool isReplying;
+class CommentCard extends StatefulWidget {
+  final Comment comment;
 
-  const CommentCard({
-    Key? key,
-    required this.username,
-    required this.timeAgo,
-    required this.commentText,
-    this.isReplying = false,
-  }) : super(key: key);
+  const CommentCard({super.key, required this.comment});
+
+  @override
+  State<CommentCard> createState() => _CommentCardState();
+}
+
+class _CommentCardState extends State<CommentCard> {
+  bool isReplying = false;
 
   @override
   Widget build(BuildContext context) {
@@ -28,14 +27,10 @@ class CommentCard extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              username,
+              widget.comment.email,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(width: 4),
-            Text(
-              timeAgo,
-              style: const TextStyle(color: Colors.grey, fontSize: 12),
-            ),
             const Spacer(),
             const Icon(Icons.more_vert, size: 18),
           ],
@@ -44,7 +39,7 @@ class CommentCard extends StatelessWidget {
 
         // Comment Text
         Text(
-          commentText,
+          widget.comment.body,
           style: const TextStyle(fontSize: 14),
         ),
         const SizedBox(height: 8),
@@ -57,9 +52,16 @@ class CommentCard extends StatelessWidget {
               onPressed: () {},
             ),
             const SizedBox(width: 4),
-            const Text("1", style: TextStyle(fontSize: 12)),
             const SizedBox(width: 16),
-            const Text("Reply", style: TextStyle(color: Colors.blue, fontSize: 12)),
+            InkWell(
+              child: const Text("Reply",
+                  style: TextStyle(color: Colors.blue, fontSize: 12)),
+              onTap: () {
+                setState(() {
+                  isReplying = !isReplying;
+                });
+              },
+            ),
           ],
         ),
 

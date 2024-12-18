@@ -1,55 +1,103 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/social/bloc/photos_bloc.dart';
 
-class ImageScreen extends StatelessWidget {
+class ImageScreen extends StatefulWidget {
   const ImageScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // List of image URLs
-    final List<String> images = [
-      'https://via.placeholder.com/150/92c952',
-      'https://via.placeholder.com/150/771796',
-      'https://via.placeholder.com/150/24f355',
-      'https://via.placeholder.com/150/d32776'
-    ];
+  State<ImageScreen> createState() => _ImageScreenState();
+}
 
+class _ImageScreenState extends State<ImageScreen> {
+  late final PhotosBloc _photosBloc;
+  final _pageController = PageController();
+
+  void initState() {
+    super.initState();
+    _pageController.addListener(_onPage);
+    // Khởi tạo bloc
+    _photosBloc = context.read<PhotosBloc>();
+    _photosBloc..add(PhotosFetched());
+  }
+
+  void _onPage() {
+    // if (!_pageController.hasClients) return;
+    // final max = _pageController.position.maxScrollExtent;
+    // final current = _pageController.position.pixels;
+    // if (current >= max - 2) {
+    //   _postsBloc.add(PhotosFetched());
+    // }
+  }
+
+  void dispose() {
+    _pageController.removeListener(_onPage);
+    _pageController.dispose();
+    //_photosBloc.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: [
-            // PageView for images
-            PageView.builder(
-              itemCount: images.length,
-              itemBuilder: (context, index) {
-                return Image.network(
-                  images[index],
-                  fit: BoxFit.cover,
-                );
-              },
-              scrollDirection: Axis.vertical,
-            ),
-
-            // Content Overlay
-            SafeArea(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: BlocBuilder<PhotosBloc, PhotosState>(
+            buildWhen: (previous, current) => previous.photos != current.photos,
+            builder: (context, state) {
+              return Stack(
                 children: [
-                  // Top User Info
-                  _buildUserInfo(),
-                  _buildBottomActions(),
+                  // PageView for images
+                  PageView.builder(
+                    itemCount: state.photos.length,
+                    itemBuilder: (context, index) {
+                      return Image.network(
+                        state.photos[index].url,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.broken_image,
+                            size: 50,
+                            color: Colors.grey,
+                          );
+                        },
+                      );
+                    },
+                    onPageChanged: (index) {
+                      if (index >= state.photos.length - 2) {
+                        _photosBloc.add(PhotosFetched());
+                      }
+                    },
+                    scrollDirection: Axis.vertical,
+                  ),
+
+                  // Content Overlay
+                  SafeArea(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Top User Info
+                        _buildUserInfo(),
+                        _buildBottomActions(),
+                      ],
+                    ),
+                  ),
                 ],
-              ),
-            ),
-          ],
-        ),
+              );
+            }),
       ),
     );
   }
 
   // Top User Info
   Widget _buildUserInfo() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -60,19 +108,22 @@ class ImageScreen extends StatelessWidget {
               'https://images.unsplash.com/photo-1544723795-3fb6469f5b39',
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           // User Text Info
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 '@marina_bothman',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               SizedBox(
                 width: 200,
-                child: const Text(
+                child: Text(
                   'The best day with my best friends! @sam_rogerson @alice_cooper',
                   style: TextStyle(fontSize: 14, color: Colors.white70),
                   overflow: TextOverflow.clip,

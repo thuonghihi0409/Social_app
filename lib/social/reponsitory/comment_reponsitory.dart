@@ -5,18 +5,17 @@ import '../models/photo.dart';
 
 class CommentRepository {
   final String baseUrl;
-
-  CommentRepository({this.baseUrl = "https://jsonplaceholder.typicode.com/posts"});
-
-  
- 
-
+  final int limit = 5;
+  CommentRepository(
+      {this.baseUrl = "https://jsonplaceholder.typicode.com/posts"});
   // get comment by ID Post
-  Future<Comment> fetchCommentsByIdPost(int id) async {
+  Future<List<Comment>> fetchCommentsByIdPost(int start, int id) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/$id/comments'));
+      final response = await http
+          .get(Uri.parse('$baseUrl/$id/comments?_start=$start&_limit=$limit'));
       if (response.statusCode == 200) {
-        return Comment.fromJson(json.decode(response.body));
+        List<dynamic> jsonList = json.decode(response.body);
+        return jsonList.map((json) => Comment.fromJson(json)).toList();
       } else {
         throw Exception("Failed to load photo with ID: $id");
       }
@@ -37,7 +36,8 @@ class CommentRepository {
       if (response.statusCode == 201) {
         return Photo.fromJson(json.decode(response.body));
       } else {
-        throw Exception("Failed to add photo. Status Code: ${response.statusCode}");
+        throw Exception(
+            "Failed to add photo. Status Code: ${response.statusCode}");
       }
     } catch (e) {
       throw Exception("Error adding photo: $e");

@@ -5,7 +5,7 @@ import '../models/photo.dart';
 
 class CommentRepository {
   final String baseUrl;
-  final int limit = 5;
+  final int limit = 88;
   CommentRepository(
       {this.baseUrl = "https://jsonplaceholder.typicode.com/posts"});
   // get comment by ID Post
@@ -13,7 +13,9 @@ class CommentRepository {
     try {
       final response = await http
           .get(Uri.parse('$baseUrl/$id/comments?_start=$start&_limit=$limit'));
+
       if (response.statusCode == 200) {
+        print("=============getttttttttt start= ${start}");
         List<dynamic> jsonList = json.decode(response.body);
         return jsonList.map((json) => Comment.fromJson(json)).toList();
       } else {

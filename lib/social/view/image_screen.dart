@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/social/bloc/comments_bloc.dart';
 import 'package:social_app/social/bloc/photos_bloc.dart';
+import 'package:social_app/social/models/photo.dart';
 import 'package:social_app/social/widgets/add_comment_widget.dart';
+import 'package:social_app/social/widgets/list_comment_image.dart';
+import 'package:social_app/social/widgets/reaction_widget.dart';
 
 class ImageScreen extends StatefulWidget {
   const ImageScreen({super.key});
@@ -34,6 +37,10 @@ class _ImageScreenState extends State<ImageScreen> {
     super.dispose();
   }
 
+  Future<void> _onRefresh() async {
+    _photosBloc.add(PhotoRefresh()); // add event refreshed
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,60 +48,63 @@ class _ImageScreenState extends State<ImageScreen> {
         child: BlocBuilder<PhotosBloc, PhotosState>(
           buildWhen: (previous, current) => previous.photos != current.photos,
           builder: (context, state) {
-            return PageView.builder(
-              controller: _pageController,
-              itemCount: state.photos.length,
-              itemBuilder: (context, index) {
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Fullscreen Image
-                    Image.network(
-                      state.photos[index].url,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.broken_image,
-                          size: 50,
-                          color: Colors.grey,
-                        );
-                      },
-                    ),
-
-                    // Top User Info with Blur Background
-                    Positioned(
-                      top: 20,
-                      left: 0,
-                      right: 100,
-                      child: _buildBlurContainer(
-                        child: _buildUserInfo(),
+            return RefreshIndicator(
+              onRefresh: _onRefresh,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: state.photos.length,
+                itemBuilder: (context, index) {
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Fullscreen Image
+                      Image.network(
+                        state.photos[index].url,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.broken_image,
+                            size: 50,
+                            color: Colors.grey,
+                          );
+                        },
                       ),
-                    ),
 
-                    // Bottom Actions with Blur Background
-                    Positioned(
-                      bottom: 60,
-                      left: 0,
-                      right: 0,
-                      child: _buildBlurContainer(
-                        child: _buildBottomActions(state.photos[index].id),
+                      // Top User Info with Blur Background
+                      Positioned(
+                        top: 20,
+                        left: 0,
+                        right: 100,
+                        child: _buildBlurContainer(
+                          child: _buildUserInfo(),
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
-              onPageChanged: (index) {
-                if (index >= state.photos.length - 2) {
-                  _photosBloc.add(PhotosFetched());
-                }
-              },
-              scrollDirection: Axis.vertical,
+
+                      // Bottom Actions with Blur Background
+                      Positioned(
+                        bottom: 60,
+                        left: 0,
+                        right: 0,
+                        child: _buildBlurContainer(
+                          child: _buildBottomActions(state.photos[index].id),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+                onPageChanged: (index) {
+                  if (index >= state.photos.length - 2) {
+                    _photosBloc.add(PhotosFetched());
+                  }
+                },
+                scrollDirection: Axis.vertical,
+              ),
             );
           },
         ),
@@ -163,10 +173,21 @@ class _ImageScreenState extends State<ImageScreen> {
           // Action Icons
           Row(
             children: [
-              _buildIconWithText(Icons.favorite, '37k'),
-              _buildIconWithText(Icons.chat_bubble_outline, '200k'),
-              _buildIconWithText(Icons.favorite_border, '15k'),
-              _buildIconWithText(Icons.share, '302k'),
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          _showCommentsEmage(id);
+                        },
+                        icon: Icon(Icons.comment, color: Colors.white70)),
+                    const SizedBox(width: 4),
+                    Text("37k", style: const TextStyle(color: Colors.white)),
+                    ReactionWidget()
+                  ],
+                ),
+              ),
             ],
           ),
 
@@ -190,20 +211,6 @@ class _ImageScreenState extends State<ImageScreen> {
     );
   }
 
-  // Icon with Text Widget
-  Widget _buildIconWithText(IconData icon, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 16.0),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white70),
-          const SizedBox(width: 4),
-          Text(label, style: const TextStyle(color: Colors.white)),
-        ],
-      ),
-    );
-  }
-
   // Blur Container
   Widget _buildBlurContainer({required Widget child}) {
     return ClipRRect(
@@ -211,10 +218,21 @@ class _ImageScreenState extends State<ImageScreen> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          color: Colors.black.withOpacity(0.4),
+          color: Colors.black.withOpacity(0.02),
           child: child,
         ),
       ),
     );
+  }
+
+  void _showCommentsEmage(int id) {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        useRootNavigator: true,
+        builder: (context) {
+          return FractionallySizedBox(
+              heightFactor: 0.8, child: ListCommentImage(id));
+        });
   }
 }

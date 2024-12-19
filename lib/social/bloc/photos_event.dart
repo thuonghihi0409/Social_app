@@ -7,3 +7,5 @@ class PhotosEvent extends Equatable {
 }
 
 final class PhotosFetched extends PhotosEvent {}
+
+final class PhotoRefresh extends PhotosEvent {}

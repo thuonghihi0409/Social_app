@@ -53,7 +53,7 @@ class _AddCommentWidgetState extends State<AddCommentWidget> {
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: Colors.grey.shade100.withOpacity(0.1),
         border: Border.all(color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(8),
       ),

@@ -19,16 +19,18 @@ class _PostScreenState extends State<PostScreen> {
   void initState() {
     super.initState();
     _postsBloc = context.read<PostsBloc>();
-    _postsBloc..add(PostFetched());
+    _postsBloc.add(PostFetched());
     _scrollController.addListener(_onScroll);
   }
 
+  /// call function
   void _onScroll() {
     if (_isBottom) {
       _postsBloc.add(PostFetched());
     }
   }
 
+  /// check scroll
   bool get _isBottom {
     if (!_scrollController.hasClients) return false;
     final maxScroll = _scrollController.position.maxScrollExtent;
@@ -36,10 +38,14 @@ class _PostScreenState extends State<PostScreen> {
     return currentScroll >= (maxScroll * 0.9);
   }
 
+  /// function to call when last list
+  Future<void> _onRefresh() async {
+    _postsBloc.add(PostRefreshed()); // add event refreshed
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
-    //_postsBloc.close();
     super.dispose();
   }
 
@@ -56,19 +62,22 @@ class _PostScreenState extends State<PostScreen> {
               if (state.posts.isEmpty) {
                 return const Center(child: Text('No posts'));
               }
-              return ListView.builder(
-                itemBuilder: (BuildContext context, int index) {
-                  return index >= state.posts.length
-                      ? const BottomLoader()
-                      : PostItem(
-                          post: state.posts[index],
-                          postsBloc: _postsBloc,
-                        );
-                },
-                itemCount: state.hasReachedMax
-                    ? state.posts.length
-                    : state.posts.length + 1,
-                controller: _scrollController,
+              return RefreshIndicator(
+                onRefresh: _onRefresh,
+                child: ListView.builder(
+                  itemBuilder: (BuildContext context, int index) {
+                    return index >= state.posts.length
+                        ? const BottomLoader()
+                        : PostItem(
+                            post: state.posts[index],
+                            postsBloc: _postsBloc,
+                          );
+                  },
+                  itemCount: state.hasReachedMax
+                      ? state.posts.length
+                      : state.posts.length + 1,
+                  controller: _scrollController,
+                ),
               );
             case PostStatus.initial:
               return const Center(child: CircularProgressIndicator());

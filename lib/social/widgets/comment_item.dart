@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:social_app/social/models/comment.dart';
+import 'package:social_app/social/widgets/reaction_widget.dart';
 
 class CommentCard extends StatefulWidget {
   final Comment comment;
@@ -47,10 +48,7 @@ class _CommentCardState extends State<CommentCard> {
         // Comment Actions
         Row(
           children: [
-            IconButton(
-              icon: const Icon(Icons.emoji_emotions_outlined, size: 18),
-              onPressed: () {},
-            ),
+            ReactionWidget(),
             const SizedBox(width: 4),
             const SizedBox(width: 16),
             InkWell(
@@ -87,7 +85,6 @@ class _CommentCardState extends State<CommentCard> {
               decoration: InputDecoration(
                 hintText: "Add a comment...",
                 border: InputBorder.none,
-                suffixText: "@amysmith",
                 suffixStyle: const TextStyle(color: Colors.blue),
               ),
             ),

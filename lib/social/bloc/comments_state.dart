@@ -3,12 +3,12 @@ part of 'comments_bloc.dart';
 enum CommentsStatus { initial, success, failure }
 
 class CommentsState extends Equatable {
-  CommentsState(
-      {this.status = CommentsStatus.initial,
-      this.comments = const <Comment>[],
-      this.hasReachedMax = false,
-      this.id = 0});
-
+  CommentsState({
+    this.status = CommentsStatus.initial,
+    this.comments = const <Comment>[],
+    this.hasReachedMax = false,
+    this.id = -1,
+  });
   @override
   // TODO: implement props
   List<Object?> get props => [status, comments, hasReachedMax];

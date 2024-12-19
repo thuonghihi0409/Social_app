@@ -74,6 +74,19 @@ class _ImageScreenState extends State<ImageScreen> {
                           );
                         },
                       ),
+                      Positioned(
+                        top: 300,
+                        left: 50,
+                        right: 100,
+                        child: _buildBlurContainer(
+                          child: Center(
+                            child: Text(
+                              "${state.photos[index].id}",
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ),
+                        ),
+                      ),
 
                       // Top User Info with Blur Background
                       Positioned(
@@ -235,7 +248,12 @@ class _ImageScreenState extends State<ImageScreen> {
         useRootNavigator: true,
         builder: (context) {
           return FractionallySizedBox(
-              heightFactor: 0.8, child: ListCommentImage(id));
+              heightFactor: 0.8,
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: ListCommentImage(id)));
         });
   }
 }

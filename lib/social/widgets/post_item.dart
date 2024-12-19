@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/social/bloc/comment_bloc/comments_bloc.dart';
+import 'package:social_app/social/bloc/photo_bloc/photos_bloc.dart';
 import 'package:social_app/social/bloc/post_bloc/posts_bloc.dart';
 import 'package:social_app/social/models/post.dart';
 
@@ -47,6 +48,12 @@ class _PostItemState extends State<PostItem> {
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 20),
                   softWrap: true,
+                ),
+              ),
+              Center(
+                child: Text(
+                  "${widget.post.id}",
+                  style: TextStyle(fontSize: 18, color: Colors.blue),
                 ),
               ),
               const SizedBox(width: 4),
@@ -131,7 +138,12 @@ class _PostItemState extends State<PostItem> {
         useRootNavigator: true,
         builder: (context) {
           return FractionallySizedBox(
-              heightFactor: 0.8, child: ListComment(widget.post));
+              heightFactor: 0.8,
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: ListComment(widget.post)));
         });
   }
 
@@ -157,6 +169,9 @@ class _PostItemState extends State<PostItem> {
               TextButton(
                 child: Text("Delete"),
                 onPressed: () {
+                  context
+                      .read<PhotosBloc>()
+                      .add(PhotoDeleted(id: widget.post.id));
                   widget.postsBloc.add(PostDeleted(post: widget.post));
                   Navigator.of(context).pop();
                 },

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/social/models/photo.dart';
@@ -10,6 +12,7 @@ class PhotosBloc extends Bloc<PhotosEvent, PhotosState> {
   PhotosBloc() : super(PhotosState()) {
     on<PhotosFetched>(_fetchPhotos);
     on<PhotoRefresh>(_refreshPhotos);
+    on<PhotoDeleted>(_deletedPhoto);
   }
 
   Future<void> _fetchPhotos(
@@ -34,6 +37,21 @@ class PhotosBloc extends Bloc<PhotosEvent, PhotosState> {
     } catch (e) {
       emit(state.copyWith(status: PhotosStatus.failure));
     }
+  }
+
+  Future<void> _deletedPhoto(
+      PhotoDeleted event, Emitter<PhotosState> emit) async {
+    log("=======deleted${state.photos.length}");
+    List<Photo> photos = List.from(state.photos);
+
+    photos.removeWhere((photoItem) => photoItem.id == event.id);
+    photos.removeWhere((photoItem) => photoItem.id == event.id);
+    emit(state.copyWith(
+      status: PhotosStatus.success,
+      photos: photos,
+      hasReachedMax: false,
+    ));
+    log("=======deleted${state.photos.length}");
   }
 
   Future<void> _refreshPhotos(

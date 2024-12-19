@@ -1,5 +1,4 @@
-
- import 'package:equatable/equatable.dart';
+import 'package:equatable/equatable.dart';
 
 class Photo extends Equatable {
   final int albumId;
@@ -38,8 +37,8 @@ class Photo extends Equatable {
       'thumbnailUrl': thumbnailUrl,
     };
   }
-  
+
   @override
   // TODO: implement props
-  List<Object?> get props => throw UnimplementedError();
+  List<Object?> get props => [albumId, title, url, thumbnailUrl];
 }

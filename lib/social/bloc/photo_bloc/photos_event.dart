@@ -9,3 +9,9 @@ class PhotosEvent extends Equatable {
 final class PhotosFetched extends PhotosEvent {}
 
 final class PhotoRefresh extends PhotosEvent {}
+
+final class PhotoDeleted extends PhotosEvent {
+  final int id;
+
+  PhotoDeleted({required this.id});
+}

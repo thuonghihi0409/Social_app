@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/social/bloc/comments_bloc.dart';
+import 'package:social_app/social/bloc/comment_bloc/comments_bloc.dart';
 
 import 'package:social_app/social/models/post.dart';
 import 'package:social_app/social/widgets/add_comment_widget.dart';
@@ -25,13 +25,13 @@ class _ListCommentState extends State<ListComment> {
   void initState() {
     super.initState();
     commentsBloc = context.read<CommentsBloc>();
-    commentsBloc..add(commentsFetched(id: widget.post.id));
+    commentsBloc..add(CommentsFetched(id: widget.post.id));
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
     if (_isBottom && !commentsBloc.state.hasReachedMax) {
-      commentsBloc.add(commentsFetched(id: widget.post.id));
+      commentsBloc.add(CommentsFetched(id: widget.post.id));
     }
   }
 

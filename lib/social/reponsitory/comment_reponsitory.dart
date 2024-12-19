@@ -5,7 +5,7 @@ import '../models/photo.dart';
 
 class CommentRepository {
   final String baseUrl;
-  final int limit = 88;
+  final int limit = 5;
   CommentRepository(
       {this.baseUrl = "https://jsonplaceholder.typicode.com/posts"});
   // get comment by ID Post

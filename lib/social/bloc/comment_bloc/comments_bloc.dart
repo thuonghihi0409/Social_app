@@ -9,13 +9,13 @@ part 'comments_event.dart';
 class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
   CommentsBloc()
       : super(CommentsState(comments: [], status: CommentsStatus.initial)) {
-    on<commentsFetched>(_fetchComments);
-    on<commentsAdd>(_addComments);
+    on<CommentsFetched>(_fetchComments);
+    on<CommentsAdd>(_addComments);
   }
 
   Future<void> _addComments(
-      commentsAdd event, Emitter<CommentsState> emit) async {
-    CommentRepository commentRepository = CommentRepository();
+      CommentsAdd event, Emitter<CommentsState> emit) async {
+    // CommentRepository commentRepository = CommentRepository();
     return emit(state.copyWith(
         status: CommentsStatus.success,
         comments: List.of(state.comments)..add(event.comment),
@@ -23,8 +23,8 @@ class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
   }
 
   Future<void> _fetchComments(
-      commentsFetched event, Emitter<CommentsState> emit) async {
-    // Reset trạng thái nếu ID khác
+      CommentsFetched event, Emitter<CommentsState> emit) async {
+    // Reset state if ID different
     print("============= state=${state.id}   event=${event.id}");
     if (state.id != event.id) {
       emit(CommentsState(
@@ -35,7 +35,6 @@ class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
       ));
     }
 
-    // Nếu đã đạt max thì không gọi API nữa
     if (state.hasReachedMax) return;
 
     CommentRepository commentRepository = CommentRepository();
@@ -43,12 +42,10 @@ class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
     try {
       print("============= state.comments.length=${state.comments.length}");
 
-      // Kiểm tra nếu đang ở trạng thái ban đầu
       if (state.status == CommentsStatus.initial) {
         final comments = await commentRepository.fetchCommentsByIdPost(
             state.comments.length, event.id);
 
-        // Nếu không có dữ liệu, đánh dấu đã tải hết
         if (comments.isEmpty) {
           emit(state.copyWith(hasReachedMax: true));
           return;

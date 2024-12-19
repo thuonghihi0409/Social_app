@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/social/bloc/comments_bloc.dart';
-import 'package:social_app/social/models/photo.dart';
+import 'package:social_app/social/bloc/comment_bloc/comments_bloc.dart';
 
 import 'package:social_app/social/widgets/add_comment_widget.dart';
 import 'package:social_app/social/widgets/buttom_loader.dart';
@@ -25,13 +24,13 @@ class _ListCommentState extends State<ListCommentImage> {
   void initState() {
     super.initState();
     commentsBloc = context.read<CommentsBloc>();
-    commentsBloc..add(commentsFetched(id: widget.id));
+    commentsBloc..add(CommentsFetched(id: widget.id));
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
     if (_isBottom) {
-      commentsBloc.add(commentsFetched(id: widget.id));
+      commentsBloc.add(CommentsFetched(id: widget.id));
     }
   }
 

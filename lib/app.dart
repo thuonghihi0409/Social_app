@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/social/bloc/comments_bloc.dart';
-import 'package:social_app/social/bloc/photos_bloc.dart';
-import 'package:social_app/social/bloc/posts_bloc.dart';
+import 'package:social_app/social/bloc/comment_bloc/comments_bloc.dart';
+import 'package:social_app/social/bloc/photo_bloc/photos_bloc.dart';
+import 'package:social_app/social/bloc/post_bloc/posts_bloc.dart';
 
 import 'package:social_app/social/view/image_screen.dart';
 import 'package:social_app/social/view/post_screen.dart';
@@ -36,11 +36,13 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeSreeenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeSreeenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  final PageController _pageController = PageController();
+
   final List<Widget> _screens = [
     PostScreen(),
     ImageScreen(),
@@ -51,7 +53,15 @@ class _HomeSreeenState extends State<HomeScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          _screens[_selectedIndex],
+          PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            children: _screens,
+          ),
           Positioned(
             bottom: 5,
             left: 40,
@@ -80,6 +90,8 @@ class _HomeSreeenState extends State<HomeScreen> {
                     setState(() {
                       _selectedIndex = index;
                     });
+                    // move page when selected
+                    _pageController.jumpToPage(index);
                   },
                   items: [
                     _buildNavItem(

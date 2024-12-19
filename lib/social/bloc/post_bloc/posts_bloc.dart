@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:social_app/social/models/post.dart';
@@ -9,7 +11,23 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
   PostsBloc() : super(PostsState()) {
     on<PostFetched>(_onPostFetched);
     on<PostRefreshed>(_onPostRefreshed);
+    on<PostDeleted>(_onPostDeleted);
   }
+  Future<void> _onPostDeleted(
+      PostDeleted event, Emitter<PostsState> emit) async {
+    log("=======deleted${state.posts.length}");
+    List<Post> posts = List.from(state.posts);
+
+    posts.removeWhere((postItem) => postItem.id == event.post.id);
+    posts.removeWhere((postItem) => postItem.id == event.post.id);
+    emit(state.copyWith(
+      status: PostStatus.success,
+      posts: posts,
+      hasReachedMax: false,
+    ));
+    log("=======deleted${state.posts.length}");
+  }
+
   Future<void> _onPostFetched(
       PostFetched event, Emitter<PostsState> emit) async {
     if (state.hasReachedMax) return;

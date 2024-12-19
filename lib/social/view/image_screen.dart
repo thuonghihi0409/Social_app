@@ -1,9 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/social/bloc/comments_bloc.dart';
-import 'package:social_app/social/bloc/photos_bloc.dart';
-import 'package:social_app/social/models/photo.dart';
+import 'package:social_app/social/bloc/comment_bloc/comments_bloc.dart';
+import 'package:social_app/social/bloc/photo_bloc/photos_bloc.dart';
 import 'package:social_app/social/widgets/add_comment_widget.dart';
 import 'package:social_app/social/widgets/list_comment_image.dart';
 import 'package:social_app/social/widgets/reaction_widget.dart';
@@ -183,7 +182,11 @@ class _ImageScreenState extends State<ImageScreen> {
                         },
                         icon: Icon(Icons.comment, color: Colors.white70)),
                     const SizedBox(width: 4),
-                    Text("37k", style: const TextStyle(color: Colors.white)),
+                    BlocBuilder<CommentsBloc, CommentsState>(
+                        builder: (context, state) {
+                      return Text("${state.comments.length}",
+                          style: const TextStyle(color: Colors.white));
+                    }),
                     ReactionWidget()
                   ],
                 ),

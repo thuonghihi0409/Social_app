@@ -9,3 +9,9 @@ class PostsEvent extends Equatable {
 final class PostFetched extends PostsEvent {}
 
 final class PostRefreshed extends PostsEvent {}
+
+final class PostDeleted extends PostsEvent {
+  final Post post;
+
+  PostDeleted({required this.post});
+}

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:social_app/social/bloc/comments_bloc.dart';
+import 'package:social_app/social/bloc/comment_bloc/comments_bloc.dart';
 import 'package:social_app/social/models/comment.dart';
 
 class AddCommentWidget extends StatefulWidget {
@@ -38,7 +38,7 @@ class _AddCommentWidgetState extends State<AddCommentWidget> {
       email: 'vanthuong@gmail',
     );
 
-    widget.commentsBloc.add(commentsAdd(comment: comment, id: widget.id));
+    widget.commentsBloc.add(CommentsAdd(comment: comment, id: widget.id));
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
         _isSending = false;
